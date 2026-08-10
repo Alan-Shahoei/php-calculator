@@ -1,5 +1,12 @@
 <?php
 
+session_start();
+if (!isset($_SESSION['calculator']))
+    $_SESSION['calculator'] = [
+            'expression' => [],
+            'result' => null
+    ];
+
 require_once 'calculator.php';
 
 $validKeys = [
