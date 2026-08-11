@@ -216,6 +216,27 @@ function handleSquareRoot($selectedKey, $state)
 
 function handleToggleSign($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        if ((float) $state['result'] !== 0.0)
+            $state['result'] *= -1;
+
+        return $state;
+    }
+
+    if ($state['expression'] === [])
+        return $state;
+
+    $expressionLastIndex = array_key_last($state['expression']);
+    $expressionLastToken = $state['expression'][$expressionLastIndex];
+
+    if (!is_numeric($expressionLastToken) && (float)$expressionLastToken === 0.0)
+        return $state;
+
+    if (str_starts_with($expressionLastToken, '-'))
+        $state['expression'][$expressionLastIndex] = substr($expressionLastToken, 1);
+    else
+        $state['expression'][$expressionLastIndex] = '-' . $expressionLastToken;
+
     return $state;
 }
 
