@@ -19,6 +19,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key'])) {
     $_SESSION['calculator'] = $calculator;
 }
 
+$calculator = $_SESSION['calculator'];
+
+$expressionDisplay = implode(' ', $calculator['expression']);
+$expressionDisplay = str_replace(['*', '/', 'sqrt'], ['×', '÷', '√'], $expressionDisplay);
+$resultDisplay = $calculator['result'];
+$errorDisplay = $calculator['error'];
+
+$topLineDisplay = '';
+$bottomLineDisplay = '0';
+
+$topLineDisplay = '';
+$bottomLineDisplay = '0';
+
+if ($errorDisplay === null && $resultDisplay === null) {
+    if ($expressionDisplay !== '')
+        $bottomLineDisplay = $expressionDisplay;
+} elseif ($errorDisplay === null) {
+    $topLineDisplay = $expressionDisplay;
+    $bottomLineDisplay = $resultDisplay;
+} else {
+    $topLineDisplay = $expressionDisplay;
+    $bottomLineDisplay = $errorDisplay;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -41,8 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key'])) {
         <main class="calculator">
 
             <div class="calculator-display">
-                <div class="display-line-top"></div>
-                <div class="display-line-bottom"></div>
+                <div class="display-line-top">
+                    <?= htmlspecialchars($topLineDisplay, ENT_QUOTES, 'UTF-8') ?>
+                </div>
+                <div class="display-line-bottom">
+                    <?= htmlspecialchars($bottomLineDisplay, ENT_QUOTES, 'UTF-8') ?>
+
+                </div>
             </div>
 
             <form method="post" class="calculator-keypad">
