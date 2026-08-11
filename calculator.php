@@ -287,5 +287,155 @@ function handleBackspace($selectedKey, $state)
 
 function handleEquals($selectedKey, $state)
 {
+    if ($state['result'] !== null)
+        return $state;
+
+    if ($state['expression'] === [])
+        return $state;
+
+    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
+
+    if (str_ends_with($expressionLastToken, '.'))
+        return $state;
+
+    if (!is_numeric($expressionLastToken) && $expressionLastToken !== ')')
+        return $state;
+
+    $openingParenthesisCount = 0;
+    $closingParenthesisCount = 0;
+
+    foreach ($state['expression'] as $token)
+        if ($token === '(')
+            $openingParenthesisCount++;
+        elseif ($token === ')')
+            $closingParenthesisCount++;
+
+    if ($openingParenthesisCount > $closingParenthesisCount) {
+        $missingClosingParentheses = $openingParenthesisCount - $closingParenthesisCount;
+        for ($i = 0; $i < $missingClosingParentheses; $i++)
+            $state['expression'][] = ')';
+    }
+
+    try {
+        $state['result'] = evaluateExpression($state['expression']);
+        $state['error'] = null;
+    } catch (DomainException | DivisionByZeroError $exception) {
+        $state['result'] = null;
+        $state['error'] = $exception->getMessage();
+    }
+
     return $state;
+}
+
+function evaluateExpression($expression): float
+{
+    while (in_array('(', $expression, true)) {
+        $lastOpenPIndex = -1;
+        $firstClosePIndex = -1;
+
+        foreach ($expression as $index => $token)
+            if ($token === '(')
+                $lastOpenPIndex = $index;
+
+        for ($i = $lastOpenPIndex + 1; $i < count($expression); $i++)
+            if ($expression[$i] === ')') {
+                $firstClosePIndex = $i;
+                break;
+            }
+
+        $innerExpression = array_slice($expression, $lastOpenPIndex + 1, $firstClosePIndex - $lastOpenPIndex - 1);
+
+        $innerResult = evaluateFlatExpression($innerExpression);
+
+        if ($lastOpenPIndex > 0 && $expression[$lastOpenPIndex - 1] === 'sqrt') {
+            if ($innerResult < 0)
+                throw new DomainException('Square root of a negative number is undefined.');
+
+            $innerResult = sqrt($innerResult);
+
+            $replaceStartIndex = $lastOpenPIndex - 1;
+            $replaceLength = $firstClosePIndex - $replaceStartIndex + 1;
+        } else {
+            $replaceStartIndex = $lastOpenPIndex;
+            $replaceLength = $firstClosePIndex - $lastOpenPIndex + 1;
+        }
+
+        array_splice($expression, $replaceStartIndex, $replaceLength, [(string) $innerResult]);
+    }
+
+    return evaluateFlatExpression($expression);
+}
+
+function evaluateFlatExpression($expression): float
+{
+    while (in_array('sqrt', $expression, true)) {
+        $operatorIndex = array_search('sqrt', array_reverse($expression, true), true);
+
+        $operand = (float) $expression[$operatorIndex + 1];
+
+        if ($operand < 0) throw new DomainException('Square root of a negative number is undefined.');
+
+        $result = sqrt($operand);
+
+        array_splice($expression, $operatorIndex, 2, [(string) $result]);
+    }
+
+    while (in_array('^', $expression, true)) {
+        $operatorIndex = array_search('^', array_reverse($expression, true), true);
+
+        $leftOperand = (float) $expression[$operatorIndex - 1];
+        $rightOperand = (float) $expression[$operatorIndex + 1];
+
+        if ($leftOperand === 0.0 && $rightOperand === 0.0)
+            throw new DomainException('0^0 is undefined.');
+
+        $result = $leftOperand ** $rightOperand;
+
+        array_splice($expression, $operatorIndex - 1, 3, [(string) $result]);
+    }
+
+    while (in_array('*', $expression, true) || in_array('/', $expression, true)) {
+        $operatorIndex = null;
+
+        foreach ($expression as $index => $token)
+            if ($token === '*' || $token === '/') {
+                $operatorIndex = $index;
+                break;
+            }
+
+        $leftOperand = (float) $expression[$operatorIndex - 1];
+        $rightOperand = (float) $expression[$operatorIndex + 1];
+
+        if ($expression[$operatorIndex] === '/') {
+            if ($rightOperand === 0.0)
+                throw new DivisionByZeroError('Division by zero.');
+
+            $result = $leftOperand / $rightOperand;
+        } else
+            $result = $leftOperand * $rightOperand;
+
+        array_splice($expression, $operatorIndex - 1, 3, [(string) $result]);
+    }
+
+    while (in_array('+', $expression, true) || in_array('-', $expression, true)) {
+        $operatorIndex = null;
+
+        foreach ($expression as $index => $token)
+            if ($token === '+' || $token === '-') {
+                $operatorIndex = $index;
+                break;
+            }
+
+        $leftOperand = (float) $expression[$operatorIndex - 1];
+        $rightOperand = (float) $expression[$operatorIndex + 1];
+
+        if ($expression[$operatorIndex] === '+')
+            $result = $leftOperand + $rightOperand;
+        else
+            $result = $leftOperand - $rightOperand;
+
+        array_splice($expression, $operatorIndex - 1, 3, [(string) $result]);
+    }
+
+    return (float) $expression[0];
 }

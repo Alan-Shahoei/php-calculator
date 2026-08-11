@@ -4,7 +4,8 @@ session_start();
 if (!isset($_SESSION['calculator']))
     $_SESSION['calculator'] = [
             'expression' => [],
-            'result' => null
+            'result' => null,
+            'error' => null
     ];
 
 require_once 'calculator.php';
