@@ -48,20 +48,21 @@ function handleDigit($selectedKey, $state)
         return $state;
     }
 
-    $expression = $state['expression'];
-    $lastIndex = array_key_last($expression);
+    $expressionLastIndex = array_key_last($state['expression']);
+    $expressionLastToken = $state['expression'][$expressionLastIndex];
 
-    if ($expression[$lastIndex] === ')')
+    if ($expressionLastToken === ')')
         return $state;
 
-    if (count($expression) === 1 && $expression[$lastIndex] === '0') {
-        $state['expression'][$lastIndex] = $selectedKey;
+    if ($expressionLastToken === '0') {
+        $state['expression'][$expressionLastIndex] = $selectedKey;
         return $state;
     }
 
-    $numberTokens = ['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    if ($expression[$lastIndex] === '0' && !in_array($expression[$lastIndex - 1], $numberTokens, true)) {
-        $state['expression'][$lastIndex] = $selectedKey;
+    if (is_numeric($expressionLastToken)) {
+        $number = $expressionLastToken;
+        $number .= $selectedKey;
+        $state['expression'][$expressionLastIndex] = $number;
         return $state;
     }
 
@@ -72,7 +73,7 @@ function handleDigit($selectedKey, $state)
 function handleOperator($selectedKey, $state)
 {
     if ($state['result'] !== null) {
-        $state['expression'] = [$state['result']];
+        $state['expression'] = [(string) $state['result']];
         $state['result'] = null;
         $state['expression'][] = $selectedKey;
         return $state;
@@ -82,14 +83,18 @@ function handleOperator($selectedKey, $state)
         return $state;
 
     $lastIndex = array_key_last($state['expression']);
+    $lastToken = $state['expression'][$lastIndex];
 
-    if (in_array($state['expression'][$lastIndex], ['+', '-', '*', '/', '^'], true)) {
+    if (in_array($lastToken, ['(', 'sqrt'], true))
+        return $state;
+
+    if (str_ends_with($lastToken, '.'))
+        return $state;
+
+    if (in_array($lastToken, ['+', '-', '*', '/', '^'], true)) {
         $state['expression'][$lastIndex] = $selectedKey;
         return $state;
     }
-
-    if (in_array($state['expression'][$lastIndex], ['(', '.', 'sqrt'], true))
-        return $state;
 
     $state['expression'][] = $selectedKey;
     return $state;
@@ -99,39 +104,37 @@ function handleDecimalPoint($selectedKey, $state)
 {
     if ($state['result'] !== null) {
         $state['result'] = null;
-        $state['expression'] = ['0', $selectedKey];
+        $state['expression'] = ['0.'];
         return $state;
     }
 
     if ($state['expression'] === []) {
-        $state['expression'] = ['0', $selectedKey];
+        $state['expression'] = ['0.'];
         return $state;
     }
 
-    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
-    if (in_array($expressionLastToken, ['.', ')'], true))
+    $expressionLastIndex = array_key_last($state['expression']);
+    $expressionLastToken = $state['expression'][$expressionLastIndex];
+
+    if ($expressionLastToken === ')')
+        return $state;
+
+    if (str_contains($expressionLastToken, '.'))
         return $state;
 
     $numberBoundaries = ['+', '-', '*', '/', '^', 'sqrt', '('];
-
     if (in_array($expressionLastToken, $numberBoundaries, true)) {
-        $state['expression'][] = '0';
-        $state['expression'][] = $selectedKey;
+        $state['expression'][] = '0.';
         return $state;
     }
 
-    $lastDecimalPointIndex = -1;
-    $lastNumberBoundaryIndex = -1;
-    foreach ($state['expression'] as $index => $token)
-        if ($token === '.')
-            $lastDecimalPointIndex = $index;
-        elseif (in_array($token, $numberBoundaries, true))
-            $lastNumberBoundaryIndex = $index;
-
-    if ($lastNumberBoundaryIndex < $lastDecimalPointIndex)
+    if (is_numeric($expressionLastToken)) {
+        $number = $expressionLastToken;
+        $number .= $selectedKey;
+        $state['expression'][$expressionLastIndex] = $number;
         return $state;
+    }
 
-    $state['expression'][] = $selectedKey;
     return $state;
 }
 
@@ -150,7 +153,10 @@ function handleOpeningParenthesis($selectedKey, $state)
 
     $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
 
-    if (in_array($expressionLastToken, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ')'], true))
+    if ($expressionLastToken === ')')
+        return $state;
+
+    if (is_numeric($expressionLastToken))
         return $state;
 
     $state['expression'][] = $selectedKey;
@@ -163,7 +169,11 @@ function handleClosingParenthesis($selectedKey, $state)
         return $state;
 
     $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
-    if (in_array($expressionLastToken, [')', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], true)) {
+
+    if (str_ends_with($expressionLastToken, '.'))
+        return $state;
+
+    if (is_numeric($expressionLastToken) || $expressionLastToken === ')') {
         $openingParenthesisCount = 0;
         $closingParenthesisCount = 0;
 
@@ -178,13 +188,14 @@ function handleClosingParenthesis($selectedKey, $state)
             return $state;
         }
     }
+
     return $state;
 }
 
 function handleSquareRoot($selectedKey, $state)
 {
     if ($state['result'] !== null) {
-        $state['expression'] = [$selectedKey, '(', $state['result'], ')'];
+        $state['expression'] = [$selectedKey, '(', (string) $state['result'], ')'];
         $state['result'] = null;
         return $state;
     }
@@ -225,8 +236,20 @@ function handleBackspace($selectedKey, $state)
         return $state;
     }
 
-    array_pop($state['expression']);
+    $expressionLastIndex = array_key_last($state['expression']);
+    $expressionLastToken = $state['expression'][$expressionLastIndex];
 
+    if (!is_numeric($expressionLastToken)) {
+        array_pop($state['expression']);
+        return $state;
+    }
+
+    if (strlen($expressionLastToken) === 1) {
+        array_pop($state['expression']);
+        return $state;
+    }
+
+    $state['expression'][$expressionLastIndex] = substr($expressionLastToken, 0, -1);
     return $state;
 }
 
