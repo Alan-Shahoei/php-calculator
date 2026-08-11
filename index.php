@@ -29,9 +29,6 @@ $errorDisplay = $calculator['error'];
 $topLineDisplay = '';
 $bottomLineDisplay = '0';
 
-$topLineDisplay = '';
-$bottomLineDisplay = '0';
-
 if ($errorDisplay === null && $resultDisplay === null) {
     if ($expressionDisplay !== '')
         $bottomLineDisplay = $expressionDisplay;
@@ -68,9 +65,8 @@ if ($errorDisplay === null && $resultDisplay === null) {
                 <div class="display-line-top">
                     <?= htmlspecialchars($topLineDisplay, ENT_QUOTES, 'UTF-8') ?>
                 </div>
-                <div class="display-line-bottom">
+                <div class="display-line-bottom <?= $errorDisplay !== null ? 'display-error' : '' ?>">
                     <?= htmlspecialchars($bottomLineDisplay, ENT_QUOTES, 'UTF-8') ?>
-
                 </div>
             </div>
 

@@ -159,6 +159,11 @@ body {
     text-overflow: ellipsis;
 }
 
+.display-line-bottom.display-error {
+    font-size: clamp(1.2rem, 3.5vh, 2rem);
+    line-height: 1.2;
+}
+
 .calculator-keypad {
     flex: 1;
     min-height: 0;
