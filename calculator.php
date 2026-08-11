@@ -183,6 +183,23 @@ function handleClosingParenthesis($selectedKey, $state)
 
 function handleSquareRoot($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        $state['expression'] = [$selectedKey, '(', $state['result'], ')'];
+        $state['result'] = null;
+        return $state;
+    }
+
+    if ($state['expression'] === []) {
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
+    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
+    if (in_array($expressionLastToken, ['+', '-', '*', '/', '^', '(', 'sqrt'], true)) {
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
     return $state;
 }
 
