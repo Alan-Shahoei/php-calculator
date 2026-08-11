@@ -71,6 +71,27 @@ function handleDigit($selectedKey, $state)
 
 function handleOperator($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        $state['expression'] = [$state['result']];
+        $state['result'] = null;
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
+    if ($state['expression'] === [])
+        return $state;
+
+    $lastIndex = array_key_last($state['expression']);
+
+    if (in_array($state['expression'][$lastIndex], ['+', '-', '*', '/', '^'], true)) {
+        $state['expression'][$lastIndex] = $selectedKey;
+        return $state;
+    }
+
+    if (in_array($state['expression'][$lastIndex], ['(', '.', 'sqrt'], true))
+        return $state;
+
+    $state['expression'][] = $selectedKey;
     return $state;
 }
 
