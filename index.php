@@ -17,8 +17,12 @@ $validKeys = [
 
 $selectedKey = null;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key']) && in_array($_POST['key'], $validKeys, true))
-        $selectedKey = $_POST['key'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key']) && in_array($_POST['key'], $validKeys, true)) {
+    $selectedKey = $_POST['key'];
+    $calculator = $_SESSION['calculator'];
+    $calculator = processSelectedKey($selectedKey, $calculator);
+    $_SESSION['calculator'] = $calculator;
+}
 
 ?>
 
