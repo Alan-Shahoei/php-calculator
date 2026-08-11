@@ -37,6 +37,35 @@ function processSelectedKey ($selectedKey, $state)
 
 function handleDigit($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        $state['result'] = null;
+        $state['expression'] = [$selectedKey];
+        return $state;
+    }
+
+    if ($state['expression'] === []) {
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
+    $expression = $state['expression'];
+    $lastIndex = array_key_last($expression);
+
+    if ($expression[$lastIndex] === ')')
+        return $state;
+
+    if (count($expression) === 1 && $expression[$lastIndex] === '0') {
+        $state['expression'][$lastIndex] = $selectedKey;
+        return $state;
+    }
+
+    $numberTokens = ['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    if ($expression[$lastIndex] === '0' && !in_array($expression[$lastIndex - 1], $numberTokens, true)) {
+        $state['expression'][$lastIndex] = $selectedKey;
+        return $state;
+    }
+
+    $state['expression'][] = $selectedKey;
     return $state;
 }
 
