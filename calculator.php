@@ -270,7 +270,18 @@ function handleBackspace($selectedKey, $state)
         return $state;
     }
 
-    $state['expression'][$expressionLastIndex] = substr($expressionLastToken, 0, -1);
+    if (strlen($expressionLastToken) === 2 && str_starts_with($expressionLastToken, '-')) {
+        array_pop($state['expression']);
+        return $state;
+    }
+
+    $updatedToken = substr($expressionLastToken, 0, -1);
+
+    if ($updatedToken === '-0')
+        $updatedToken = '0';
+
+    $state['expression'][$expressionLastIndex] = $updatedToken;
+
     return $state;
 }
 
