@@ -229,7 +229,7 @@ function handleToggleSign($selectedKey, $state)
     $expressionLastIndex = array_key_last($state['expression']);
     $expressionLastToken = $state['expression'][$expressionLastIndex];
 
-    if (!is_numeric($expressionLastToken) && (float)$expressionLastToken === 0.0)
+    if (!is_numeric($expressionLastToken) || (float)$expressionLastToken === 0.0)
         return $state;
 
     if (str_starts_with($expressionLastToken, '-'))
