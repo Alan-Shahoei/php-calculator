@@ -159,6 +159,25 @@ function handleOpeningParenthesis($selectedKey, $state)
 
 function handleClosingParenthesis($selectedKey, $state)
 {
+    if ($state['result'] !== null || $state['expression'] === [])
+        return $state;
+
+    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
+    if (in_array($expressionLastToken, [')', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], true)) {
+        $openingParenthesisCount = 0;
+        $closingParenthesisCount = 0;
+
+        foreach ($state['expression'] as $token)
+            if ($token === '(')
+                $openingParenthesisCount++;
+            elseif ($token === ')')
+                $closingParenthesisCount++;
+
+        if ($openingParenthesisCount > $closingParenthesisCount) {
+            $state['expression'][] = $selectedKey;
+            return $state;
+        }
+    }
     return $state;
 }
 
