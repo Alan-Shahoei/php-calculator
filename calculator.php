@@ -29,6 +29,9 @@ function processSelectedKey ($selectedKey, $state)
         '=' => 'handleEquals'
     ];
 
+    if ($selectedKey === null || !isset($handlers[$selectedKey]))
+        return $state;
+
     return $handlers[$selectedKey]($selectedKey, $state);
 }
 

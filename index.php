@@ -9,15 +9,9 @@ if (!isset($_SESSION['calculator']))
 
 require_once 'calculator.php';
 
-$validKeys = [
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
-        '+', '-', '*', '/', '^', '(', ')', '=', 'clear',
-        'backspace', 'sqrt', 'toggle-sign'
-];
-
 $selectedKey = null;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key']) && in_array($_POST['key'], $validKeys, true)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key'])) {
     $selectedKey = $_POST['key'];
     $calculator = $_SESSION['calculator'];
     $calculator = processSelectedKey($selectedKey, $calculator);
