@@ -137,6 +137,23 @@ function handleDecimalPoint($selectedKey, $state)
 
 function handleOpeningParenthesis($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        $state['result'] = null;
+        $state['expression'] = [$selectedKey];
+        return $state;
+    }
+
+    if ($state['expression'] === []) {
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
+    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
+
+    if (in_array($expressionLastToken, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ')'], true))
+        return $state;
+
+    $state['expression'][] = $selectedKey;
     return $state;
 }
 
