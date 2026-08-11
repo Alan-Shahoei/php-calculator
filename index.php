@@ -41,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['key'])) {
         <main class="calculator">
 
             <div class="calculator-display">
-                <div class="expression"></div>
-                <div class="result"></div>
+                <div class="display-line-top"></div>
+                <div class="display-line-bottom"></div>
             </div>
 
             <form method="post" class="calculator-keypad">

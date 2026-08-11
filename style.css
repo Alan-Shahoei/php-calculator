@@ -128,7 +128,7 @@ body {
     overflow: hidden;
 }
 
-.expression {
+.display-line-top {
     width: 100%;
 
     color: var(--text-secondary);
@@ -143,7 +143,7 @@ body {
     text-overflow: ellipsis;
 }
 
-.result {
+.display-line-bottom {
     width: 100%;
 
     color: var(--text-primary);
@@ -427,11 +427,11 @@ body {
         gap: 7px;
     }
 
-    .expression {
+    .display-line-top {
         font-size: clamp(0.75rem, 2.5vh, 1rem);
     }
 
-    .result {
+    .display-line-bottom {
         font-size: clamp(2rem, 7vh, 3.2rem);
     }
 
@@ -468,11 +468,11 @@ body {
         gap: 5px;
     }
 
-    .expression {
+    .display-line-top {
         font-size: 0.72rem;
     }
 
-    .result {
+    .display-line-bottom {
         font-size: clamp(1.7rem, 7vh, 2.4rem);
     }
 
