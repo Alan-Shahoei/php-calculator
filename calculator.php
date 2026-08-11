@@ -31,12 +31,21 @@ function processSelectedKey ($selectedKey, $state)
 
     if ($selectedKey === null || !isset($handlers[$selectedKey]))
         return $state;
+    if ($state['error'] !== null && !in_array($selectedKey, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear'], true))
+        return $state;
 
     return $handlers[$selectedKey]($selectedKey, $state);
 }
 
 function handleDigit($selectedKey, $state)
 {
+    if ($state['error'] !== null) {
+        $state['error'] = null;
+        $state['result'] = null;
+        $state['expression'] = [$selectedKey];
+        return $state;
+    }
+
     if ($state['result'] !== null) {
         $state['result'] = null;
         $state['expression'] = [$selectedKey];
@@ -244,6 +253,7 @@ function handleClear($selectedKey, $state)
 {
     $state['expression'] = [];
     $state['result'] = null;
+    $state['error'] = null;
     return $state;
 }
 
