@@ -97,6 +97,41 @@ function handleOperator($selectedKey, $state)
 
 function handleDecimalPoint($selectedKey, $state)
 {
+    if ($state['result'] !== null) {
+        $state['result'] = null;
+        $state['expression'] = ['0', $selectedKey];
+        return $state;
+    }
+
+    if ($state['expression'] === []) {
+        $state['expression'] = ['0', $selectedKey];
+        return $state;
+    }
+
+    $expressionLastToken = $state['expression'][array_key_last($state['expression'])];
+    if (in_array($expressionLastToken, ['.', ')'], true))
+        return $state;
+
+    $numberBoundaries = ['+', '-', '*', '/', '^', 'sqrt', '('];
+
+    if (in_array($expressionLastToken, $numberBoundaries, true)) {
+        $state['expression'][] = '0';
+        $state['expression'][] = $selectedKey;
+        return $state;
+    }
+
+    $lastDecimalPointIndex = -1;
+    $lastNumberBoundaryIndex = -1;
+    foreach ($state['expression'] as $index => $token)
+        if ($token === '.')
+            $lastDecimalPointIndex = $index;
+        elseif (in_array($token, $numberBoundaries, true))
+            $lastNumberBoundaryIndex = $index;
+
+    if ($lastNumberBoundaryIndex < $lastDecimalPointIndex)
+        return $state;
+
+    $state['expression'][] = $selectedKey;
     return $state;
 }
 
