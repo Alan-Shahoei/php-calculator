@@ -101,11 +101,23 @@ function handleToggleSign($selectedKey, $state)
 
 function handleClear($selectedKey, $state)
 {
+    $state['expression'] = [];
+    $state['result'] = null;
     return $state;
 }
 
 function handleBackspace($selectedKey, $state)
 {
+    if ($state['expression'] === [])
+        return $state;
+
+    if ($state['result'] !== null) {
+        $state['expression'] = [];
+        return $state;
+    }
+
+    array_pop($state['expression']);
+
     return $state;
 }
 
