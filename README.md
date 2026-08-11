@@ -1,100 +1,137 @@
+<div>
+
 # PHP Calculator
 
-A responsive web-based calculator built with **PHP, HTML, and CSS**.
+A responsive, session-based web calculator built with **PHP, HTML, and CSS** — no JavaScript or third-party dependencies required.
 
-It supports standard arithmetic operations, parentheses, exponentiation, square roots, decimals, sign toggling, and mathematical error handling — without JavaScript.
+[![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![JavaScript not required](https://img.shields.io/badge/JavaScript-not%20required-F7DF1E?logo=javascript&logoColor=black)
+
+</div>
+
+## Overview
+
+PHP Calculator is a lightweight web application that performs calculations entirely on the server. Each keypad action is submitted through an HTTP `POST` request, processed by PHP, and stored in the user's session so the current expression persists between requests.
+
+The project includes a custom expression evaluator and does **not** rely on PHP's `eval()` function. It supports operator precedence, nested parentheses, exponentiation, square roots, decimal values, negative numbers, and controlled recovery from invalid calculations.
+
+<div >
+
+![PHP Calculator Preview](assets/calculator-preview.png)
+
+</div>
 
 ## Features
 
 - Addition, subtraction, multiplication, and division
-- Decimal numbers
-- Parentheses
-- Exponentiation
-- Square root
+- Exponentiation with right-to-left associativity
+- Square-root calculations
+- Nested parentheses and automatic closing of unmatched opening parentheses
+- Decimal and negative-number input
 - Positive/negative sign toggle
+- Result chaining for continued calculations
 - Clear and backspace controls
-- Standard operator precedence
-- Right-associative exponentiation
+- Server-side state management with PHP sessions
 - Error handling for division by zero, negative square roots, and `0^0`
-- Responsive two-line display
-- Session-based state management
-- No JavaScript
-- No `eval()`
+- Responsive interface for desktop, tablet, and mobile screens
+- Accessible labels for icon-based controls and visible keyboard focus styles
+- Custom SVG icons with no external UI library
+- No database, package manager, build step, or JavaScript required
 
-## Technologies
+## Technology Stack
 
-- PHP
-- HTML5
-- CSS3
-- PHP Sessions
-
-## Project Structure
-
-```text
-php-calculator/
-├── index.php
-├── calculator.php
-├── style.css
-├── README.md
-├── LICENSE
-└── .gitignore
-```
-
-`index.php` handles form submissions, session state, and rendering.  
-`calculator.php` contains the calculator handlers and expression evaluation logic.  
-`style.css` contains the responsive interface styling.
-
-## Getting Started
-
-### XAMPP
-
-Place the project inside:
-
-```text
-C:\xampp\htdocs\php-calculator
-```
-
-Start Apache and open:
-
-```text
-http://localhost/php-calculator/
-```
-
-### PHP Built-in Server
-
-```bash
-php -S localhost:8000
-```
-
-Then open:
-
-```text
-http://localhost:8000
-```
+| Technology   | Purpose                                                                      |
+|--------------|------------------------------------------------------------------------------|
+| PHP 8.0+     | Request handling, session state, input validation, and expression evaluation |
+| HTML5        | Calculator structure and form controls                                       |
+| CSS3         | Responsive layout, visual design, transitions, and component styling         |
+| PHP Sessions | Preserving calculator state between requests                                 |
 
 ## How It Works
 
-The calculator stores its state in a PHP session and processes each button press through an HTML form submission.
+1. The user selects a calculator key.
+2. The form sends the selected key to `index.php` using `POST`.
+3. The current calculator state is loaded from `$_SESSION`.
+4. `processSelectedKey()` routes the input to its dedicated handler.
+5. The expression is stored as validated tokens rather than executable code.
+6. When `=` is selected, the custom evaluator resolves the expression according to mathematical precedence.
+7. The updated expression, result, or error is saved to the session and rendered in the display.
 
-Expressions are evaluated with this precedence:
+### Evaluation Order
 
-1. Parentheses and square roots
-2. Exponentiation
-3. Multiplication and division
-4. Addition and subtraction
+| Priority | Operation                   | Associativity               |
+|---------:|-----------------------------|-----------------------------|
+|        1 | Parentheses                 | Innermost first             |
+|        2 | Square root                 | Rightmost first when nested |
+|        3 | Exponentiation              | Right to left               |
+|        4 | Multiplication and division | Left to right               |
+|        5 | Addition and subtraction    | Left to right               |
 
-Examples:
+## Getting Started
 
-```text
-2 + 3 × 4 = 14
-(2 + 3) × 4 = 20
-2 ^ 3 ^ 2 = 512
+### Requirements
+
+- PHP 8.0 or newer
+- A modern web browser
+- PHP sessions enabled
+
+No Composer or npm installation is needed.
+
+### Run with PHP's Built-in Server
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Alan-Shahoei/php-calculator.git
+cd php-calculator
 ```
+
+Start the development server:
+
+```bash
+php -S 127.0.0.1:8000
+```
+
+Then open `http://127.0.0.1:8000` in your browser.
+
+### Run with XAMPP, WAMP, or Laragon
+
+1. Copy the project directory into your local server's document root, such as `htdocs` or `www`.
+2. Start Apache.
+3. Open the corresponding local URL, for example `http://localhost/php-calculator`.
+
+## Usage Examples
+
+| Expression     |                 Result |
+|----------------|-----------------------:|
+| `2 + 3 × 4`    |                   `14` |
+| `(12 - 4) ÷ 2` |                    `4` |
+| `2 ^ 3 ^ 2`    |                  `512` |
+| `√(81)`        |                    `9` |
+| `5 ÷ 0`        | Division-by-zero error |
+
+After a result is displayed, selecting an operator continues the calculation with that result. Selecting a digit starts a new expression.
+
+## Error Handling
+
+Invalid operations such as division by zero, square roots of negative numbers, and `0^0` are shown as controlled error messages. After an error, enter a digit to start a new expression or press `C` to reset the calculator.
+
+## Project Structure
+
+| File                            | Description                                                                                |
+|---------------------------------|--------------------------------------------------------------------------------------------|
+| `index.php`                     | Starts the session, processes requests, prepares display values, and renders the interface |
+| `calculator.php`                | Contains key handlers, state transitions, validation rules, and the expression evaluator   |
+| `style.css`                     | Defines the responsive layout, color system, controls, icons, and interaction states       |
+| `.gitignore`                    | Excludes local IDE configuration files                                                     |
+| `LICENSE`                       | Contains the MIT License                                                                   |
+| `assets/calculator-preview.png` | Project preview image used in this README                                                  |
 
 ## License
 
-Licensed under the [MIT License](LICENSE).
+This project is available under the [MIT License](LICENSE).
 
 ## Author
 
-**Alan Shahoei** — [@Alan-Shahoei](https://github.com/Alan-Shahoei)
+Created by [Alan Shahoei](https://github.com/Alan-Shahoei).
